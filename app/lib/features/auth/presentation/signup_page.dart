@@ -14,12 +14,16 @@ class SignupPage extends ConsumerStatefulWidget {
 class _SignupPageState extends ConsumerState<SignupPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
@@ -28,18 +32,14 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       return;
     }
 
-    await ref
-        .read(authControllerProvider.notifier)
-        .signUp(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
+    final notifier = ref.read(authControllerProvider.notifier);
+    await notifier.signUp(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
 
-    final state = ref.read(authControllerProvider);
-    if (state.hasError && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.error.toString())));
+    if (!mounted) {
+      return;
     }
   }
 
@@ -70,11 +70,43 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() => _obscurePassword = !_obscurePassword);
+                  },
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                ),
+              ),
               validator: (value) {
                 if (value == null || value.length < 6) {
                   return 'Minimum 6 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _confirmController,
+              obscureText: _obscureConfirm,
+              decoration: InputDecoration(
+                labelText: 'Confirm password',
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() => _obscureConfirm = !_obscureConfirm);
+                  },
+                  icon: Icon(
+                    _obscureConfirm ? Icons.visibility : Icons.visibility_off,
+                  ),
+                ),
+              ),
+              validator: (value) {
+                if (value != _passwordController.text) {
+                  return 'Passwords do not match';
                 }
                 return null;
               },
@@ -86,6 +118,13 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               onPressed: loading ? null : _submit,
               child: const Text('Sign Up'),
             ),
+            if (authState.hasError) ...[
+              const SizedBox(height: 10),
+              Text(
+                authState.error.toString(),
+                style: const TextStyle(color: Color(0xFFB33A3A)),
+              ),
+            ],
             const SizedBox(height: 10),
             TextButton(
               onPressed: () => context.pop(),

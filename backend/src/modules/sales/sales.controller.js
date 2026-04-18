@@ -40,6 +40,9 @@ async function addSale(req, res) {
   }
 
   const parsedDate = date ? new Date(date) : new Date();
+  if (Number.isNaN(parsedDate.getTime())) {
+    return res.status(400).json({ message: "Invalid date" });
+  }
   const now = admin.firestore.FieldValue.serverTimestamp();
   const salesRef = businessCtx.businessRef.collection("sales").doc();
 
@@ -129,6 +132,9 @@ async function updateSale(req, res) {
 
   if (date) {
     const parsedDate = new Date(date);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return res.status(400).json({ message: "Invalid date" });
+    }
     updateData.date = admin.firestore.Timestamp.fromDate(parsedDate);
     updateData.monthKey = getMonthKey(parsedDate);
   }

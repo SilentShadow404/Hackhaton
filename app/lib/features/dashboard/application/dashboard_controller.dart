@@ -67,6 +67,7 @@ class DashboardActionController extends StateNotifier<AsyncValue<void>> {
 
   Future<void> addSale({
     required double amount,
+    required DateTime date,
     required String description,
   }) async {
     state = const AsyncLoading();
@@ -76,6 +77,7 @@ class DashboardActionController extends StateNotifier<AsyncValue<void>> {
       await repo.addSale(
         businessId: businessId,
         amount: amount,
+        date: date,
         description: description,
       );
       _refreshAll();
@@ -87,6 +89,7 @@ class DashboardActionController extends StateNotifier<AsyncValue<void>> {
 
   Future<void> addExpense({
     required double amount,
+    required DateTime date,
     required String category,
     required String description,
   }) async {
@@ -97,6 +100,7 @@ class DashboardActionController extends StateNotifier<AsyncValue<void>> {
       await repo.addExpense(
         businessId: businessId,
         amount: amount,
+        date: date,
         category: category,
         description: description,
       );

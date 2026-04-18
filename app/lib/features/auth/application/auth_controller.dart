@@ -29,6 +29,28 @@ class AuthController extends StateNotifier<AsyncValue<AuthUser?>> {
   final FirebaseAuth _auth;
   late final StreamSubscription<User?> _sub;
 
+  String _mapAuthError(FirebaseAuthException error) {
+    switch (error.code) {
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'user-not-found':
+      case 'wrong-password':
+      case 'invalid-credential':
+        return 'Incorrect email or password.';
+      case 'email-already-in-use':
+        return 'This email is already registered. Please log in.';
+      case 'weak-password':
+        return 'Password is too weak. Use at least 6 characters.';
+      case 'operation-not-allowed':
+      case 'configuration-not-found':
+        return 'Email/password sign-in is not enabled in Firebase project settings yet.';
+      case 'network-request-failed':
+        return 'Network error. Please check your connection and try again.';
+      default:
+        return error.message ?? 'Authentication failed.';
+    }
+  }
+
   Future<void> signIn({required String email, required String password}) async {
     if (email.trim().isEmpty || password.trim().isEmpty) {
       state = AsyncValue.error(
@@ -45,10 +67,7 @@ class AuthController extends StateNotifier<AsyncValue<AuthUser?>> {
         password: password,
       );
     } on FirebaseAuthException catch (error) {
-      state = AsyncValue.error(
-        error.message ?? 'Sign in failed',
-        StackTrace.current,
-      );
+      state = AsyncValue.error(_mapAuthError(error), StackTrace.current);
     }
   }
 
@@ -68,10 +87,7 @@ class AuthController extends StateNotifier<AsyncValue<AuthUser?>> {
         password: password,
       );
     } on FirebaseAuthException catch (error) {
-      state = AsyncValue.error(
-        error.message ?? 'Sign up failed',
-        StackTrace.current,
-      );
+      state = AsyncValue.error(_mapAuthError(error), StackTrace.current);
     }
   }
 
@@ -79,7 +95,11 @@ class AuthController extends StateNotifier<AsyncValue<AuthUser?>> {
     if (!email.contains('@')) {
       throw Exception('Please enter a valid email.');
     }
-    await _auth.sendPasswordResetEmail(email: email.trim());
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (error) {
+      throw Exception(_mapAuthError(error));
+    }
   }
 
   Future<void> signOut() async {

@@ -59,10 +59,13 @@ Backend running on port 4000 (auth mode: firebase)
 [32m[nodemon] restarting due to changes...[39m
 [32m[nodemon] starting `node src/server.js`[39m
 [31m[nodemon] app crashed - waiting for file changes before starting...[39m
- starting `node src/server.js`[39m
-[32m[nodemon] restarting due to changes...[39m
-[32m[nodemon] restarting due to changes...[39m
-[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting child process[39m
+[32m[nodemon] starting `node src/server.js`[39m
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+s...[39m
 [32m[nodemon] starting `node src/server.js`[39m
 Backend running on port 4000 (auth mode: firebase)
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting child process[39m
+[32m[nodemon] starting `node src/server.js`[39m
 [31m[nodemon] app crashed - waiting for file changes before starting...[39m

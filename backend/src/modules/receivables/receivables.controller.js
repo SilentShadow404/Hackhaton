@@ -47,6 +47,9 @@ async function addReceivable(req, res) {
   }
 
   const due = parseDateOrNow(dueDate);
+  if (Number.isNaN(due.getTime())) {
+    return res.status(400).json({ message: "Invalid dueDate" });
+  }
   const invoiceDate = new Date();
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ref = businessCtx.businessRef.collection("receivables").doc();
@@ -137,7 +140,9 @@ async function markReceivablePaid(req, res) {
   await db.runTransaction(async (tx) => {
     const receivableDoc = await tx.get(receivableRef);
     if (!receivableDoc.exists) {
-      throw new Error("Receivable not found");
+      const error = new Error("Receivable not found");
+      error.status = 404;
+      throw error;
     }
 
     const receivable = receivableDoc.data();

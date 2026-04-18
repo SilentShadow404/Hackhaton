@@ -128,13 +128,14 @@ class DashboardRepository {
   Future<void> addSale({
     required String businessId,
     required double amount,
+    required DateTime date,
     required String description,
   }) async {
     await _postJson(
       '${AppConfig.apiBaseUrl}/api/v1/businesses/$businessId/sales',
       {
         'amount': amount,
-        'date': DateTime.now().toIso8601String(),
+        'date': date.toIso8601String(),
         'description': description,
       },
     );
@@ -143,6 +144,7 @@ class DashboardRepository {
   Future<void> addExpense({
     required String businessId,
     required double amount,
+    required DateTime date,
     required String category,
     required String description,
   }) async {
@@ -150,7 +152,7 @@ class DashboardRepository {
       '${AppConfig.apiBaseUrl}/api/v1/businesses/$businessId/expenses',
       {
         'amount': amount,
-        'date': DateTime.now().toIso8601String(),
+        'date': date.toIso8601String(),
         'category': category,
         'description': description,
       },

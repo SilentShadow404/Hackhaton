@@ -67,6 +67,12 @@ flutter pub get
 flutter run
 ```
 
+If your backend runs on a non-default port (for example `4001`), pass it explicitly:
+
+```powershell
+flutter run --dart-define=API_BASE_URL=http://localhost:4001
+```
+
 ## 5) Next build phase
 
 After this, we wire Flutter Auth screens to Firebase Auth and integrate token-based calls to backend.

@@ -40,6 +40,9 @@ async function addExpense(req, res) {
   }
 
   const parsedDate = date ? new Date(date) : new Date();
+  if (Number.isNaN(parsedDate.getTime())) {
+    return res.status(400).json({ message: "Invalid date" });
+  }
   const now = admin.firestore.FieldValue.serverTimestamp();
   const expenseRef = businessCtx.businessRef.collection("expenses").doc();
 
@@ -135,6 +138,9 @@ async function updateExpense(req, res) {
 
   if (date) {
     const parsedDate = new Date(date);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return res.status(400).json({ message: "Invalid date" });
+    }
     updateData.date = admin.firestore.Timestamp.fromDate(parsedDate);
     updateData.monthKey = getMonthKey(parsedDate);
   }

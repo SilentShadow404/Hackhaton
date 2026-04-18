@@ -15,6 +15,8 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _sent = false;
+  bool _submitting = false;
+  String? _errorText;
 
   @override
   void dispose() {
@@ -28,20 +30,28 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
     }
 
     try {
+      setState(() {
+        _submitting = true;
+      });
       await ref
           .read(authControllerProvider.notifier)
           .sendPasswordReset(_emailController.text);
       if (!mounted) {
         return;
       }
-      setState(() => _sent = true);
+      setState(() {
+        _sent = true;
+        _errorText = null;
+        _submitting = false;
+      });
     } catch (error) {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      setState(() {
+        _errorText = error.toString();
+        _submitting = false;
+      });
     }
   }
 
@@ -69,9 +79,13 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
             ),
             const SizedBox(height: 14),
             ElevatedButton(
-              onPressed: _submit,
+              onPressed: _submitting ? null : _submit,
               child: const Text('Send reset link'),
             ),
+            if (_submitting) ...[
+              const SizedBox(height: 10),
+              const LinearProgressIndicator(minHeight: 3),
+            ],
             const SizedBox(height: 10),
             if (_sent)
               const Text(
@@ -81,6 +95,13 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+            if (_errorText != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _errorText!,
+                style: const TextStyle(color: Color(0xFFB33A3A)),
+              ),
+            ],
             const SizedBox(height: 6),
             TextButton(
               onPressed: () => context.pop(),

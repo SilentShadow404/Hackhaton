@@ -15,6 +15,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/login',
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Color(0xFFB33A3A),
+              ),
+              const SizedBox(height: 12),
+              const Text('Something went wrong while routing.'),
+              const SizedBox(height: 8),
+              Text(state.error?.toString() ?? 'Unknown route error'),
+            ],
+          ),
+        ),
+      ),
+    ),
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(path: '/signup', builder: (context, state) => const SignupPage()),
@@ -28,7 +49,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
     redirect: (context, state) {
-      final user = authState.value;
+      if (authState.isLoading) {
+        return null;
+      }
+
+      if (authState.hasError) {
+        return '/login';
+      }
+
+      final user = authState.valueOrNull;
       final isAuthRoute =
           state.uri.path == '/login' ||
           state.uri.path == '/signup' ||

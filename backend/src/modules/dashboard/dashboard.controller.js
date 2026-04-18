@@ -10,6 +10,14 @@ function sumAmounts(snapshot) {
   return snapshot.docs.reduce((acc, doc) => acc + Number(doc.data().amount || 0), 0);
 }
 
+function toIsoDay(dateValue) {
+  const date = dateValue?.toDate ? dateValue.toDate() : null;
+  if (!date) {
+    return null;
+  }
+  return date.toISOString().split("T")[0];
+}
+
 async function getDashboardSummary(req, res) {
   if (!db) {
     return res.status(400).json({ message: "Firestore is not available in mock mode" });
@@ -25,6 +33,10 @@ async function getDashboardSummary(req, res) {
   }
 
   const business = businessDoc.data();
+  if (business.ownerUid !== req.user.uid) {
+    return res.status(403).json({ message: "Access denied" });
+  }
+
   const startingBalance = Number(business.startingBalance || 0);
 
   const [salesSnap, expensesSnap, receivablesSnap, payablesSnap] = await Promise.all([
@@ -74,6 +86,10 @@ async function getCashForecast(req, res) {
   }
 
   const business = businessDoc.data();
+  if (business.ownerUid !== req.user.uid) {
+    return res.status(403).json({ message: "Access denied" });
+  }
+
   const startingBalance = Number(business.startingBalance || 0);
 
   const [salesSnap, expensesSnap, receivablesSnap, payablesSnap] = await Promise.all([
@@ -100,11 +116,11 @@ async function getCashForecast(req, res) {
     const dayKey = day.toISOString().split("T")[0];
 
     const inflow = receivables
-      .filter((r) => r.dueDate?.toDate && r.dueDate.toDate().toISOString().startsWith(dayKey))
+      .filter((r) => toIsoDay(r.dueDate) === dayKey)
       .reduce((acc, r) => acc + Number(r.amount || 0), 0);
 
     const outflow = payables
-      .filter((p) => p.dueDate?.toDate && p.dueDate.toDate().toISOString().startsWith(dayKey))
+      .filter((p) => toIsoDay(p.dueDate) === dayKey)
       .reduce((acc, p) => acc + Number(p.amount || 0), 0);
 
     runningCash = runningCash + inflow - outflow;

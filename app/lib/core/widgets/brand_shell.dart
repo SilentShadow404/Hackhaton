@@ -12,10 +12,38 @@ class BrandShell extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFF8F6EE), Color(0xFFE8F2ED)],
+          colors: [Color(0xFFF1F6F6), Color(0xFFE8F1EE)],
         ),
       ),
-      child: SafeArea(child: child),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -120,
+            right: -80,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF0E4A4A).withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -140,
+            left: -110,
+            child: Container(
+              width: 340,
+              height: 340,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFEF6C00).withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          SafeArea(child: child),
+        ],
+      ),
     );
   }
 }

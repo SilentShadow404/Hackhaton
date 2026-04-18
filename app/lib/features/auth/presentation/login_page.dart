@@ -12,9 +12,10 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _emailController = TextEditingController(text: 'owner@demo.com');
-  final _passwordController = TextEditingController(text: '123456');
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -28,18 +29,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       return;
     }
 
-    await ref
-        .read(authControllerProvider.notifier)
-        .signIn(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
+    final notifier = ref.read(authControllerProvider.notifier);
+    await notifier.signIn(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
 
-    final state = ref.read(authControllerProvider);
-    if (state.hasError && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.error.toString())));
+    if (!mounted) {
+      return;
     }
   }
 
@@ -70,8 +67,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() => _obscurePassword = !_obscurePassword);
+                  },
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                ),
+              ),
               validator: (value) {
                 if (value == null || value.length < 6) {
                   return 'Minimum 6 characters';
@@ -86,6 +93,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               onPressed: loading ? null : _submit,
               child: const Text('Log In'),
             ),
+            if (authState.hasError) ...[
+              const SizedBox(height: 10),
+              Text(
+                authState.error.toString(),
+                style: const TextStyle(color: Color(0xFFB33A3A)),
+              ),
+            ],
             const SizedBox(height: 10),
             TextButton(
               onPressed: () => context.push('/reset-password'),

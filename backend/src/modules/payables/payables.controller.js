@@ -47,6 +47,9 @@ async function addPayable(req, res) {
   }
 
   const due = parseDateOrNow(dueDate);
+  if (Number.isNaN(due.getTime())) {
+    return res.status(400).json({ message: "Invalid dueDate" });
+  }
   const billDate = new Date();
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ref = businessCtx.businessRef.collection("payables").doc();
@@ -137,7 +140,9 @@ async function markPayablePaid(req, res) {
   await db.runTransaction(async (tx) => {
     const payableDoc = await tx.get(payableRef);
     if (!payableDoc.exists) {
-      throw new Error("Payable not found");
+      const error = new Error("Payable not found");
+      error.status = 404;
+      throw error;
     }
 
     const payable = payableDoc.data();
